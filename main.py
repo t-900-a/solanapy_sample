@@ -16,8 +16,8 @@ for tx in transactions:
 	raw_tx_base64_bytes = raw_tx_str.encode('ascii')
 	raw_tx_bytes = base64.b64decode(raw_tx_base64_bytes)
 
-	tx: Transaction = Transaction.deserialize(raw_tx_bytes)
-	tx_instruction: TransactionInstruction = tx.instructions.pop()
+	des_tx: Transaction = Transaction.deserialize(raw_tx_bytes)
+	tx_instruction: TransactionInstruction = des_tx.instructions.pop()
 
 	# System Program Create accounts and transfer lamports between them == bunch of ones (signifies just a normal transaction between accounts)
 	if tx_instruction.program_id.__str__() == "11111111111111111111111111111111":
