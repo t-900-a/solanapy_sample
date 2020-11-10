@@ -22,6 +22,7 @@ for tx in transactions:
 	# System Program Create accounts and transfer lamports between them == bunch of ones (signifies just a normal transaction between accounts)
 	if tx_instruction.program_id.__str__() == "11111111111111111111111111111111":
 		transfer_params: TransferParams = decode_transfer(tx_instruction)
+		print(tx["slot"]) # blockheight
         	print(f'from:{transfer_params.from_pubkey}') # from
         	print(f'to:{transfer_params.to_pubkey}') # to
         	print(f'amount:{transfer_params.lamports * .000000001}') # amount
