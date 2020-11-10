@@ -19,10 +19,10 @@ for tx in transactions:
 	tx: Transaction = Transaction.deserialize(raw_tx_bytes)
 	tx_instruction: TransactionInstruction = tx.instructions.pop()
 	print(tx_instruction)
-	if tx_instruction.program_id.__str__() == "Stake11111111111111111111111111111111111111":
-		continue
-	transfer_params: TransferParams = decode_transfer(tx_instruction)
-
-	print(transfer_params.to_pubkey) # to
-	print(transfer_params.from_pubkey) # from
-	print(transfer_params.lamports * .000000001) # amount
+	# System Program Create accounts and transfer lamports between them == bunch of ones (signifies just a normal transaction between accounts)
+	if tx_instruction.program_id.__str__() == "11111111111111111111111111111111":
+		transfer_params: TransferParams = decode_transfer(tx_instruction)
+		print(transfer_params.to_pubkey) # to
+		print(transfer_params.from_pubkey) # from
+		print(transfer_params.lamports * .000000001) # amount
+	
