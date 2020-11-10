@@ -1,8 +1,12 @@
 from solana.rpc.api import Client
 from solana.transaction import Transaction
-from solana.system_program import decode_transfer
-from solana.system_program import TransferParams
+from solana.system_program import decode_transfer as sol_decode_transfer
+from spl.token.instructions import decode_transfer as spl_decode_transfer
+from solana.system_program import TransferParams as SOLTransferParams
+from spl.token.instructions import TransferParams as SPLTransferParams
 from solana.transaction import Transaction, TransactionInstruction
+from solana._layouts.system_instructions import SYSTEM_INSTRUCTIONS_LAYOUT, InstructionType as SOLInstructionType
+from spl.token._layouts import INSTRUCTIONS_LAYOUT, InstructionType as SPLInstructionType
 import base64
 # solana_client = Client("https://api.mainnet-beta.solana.com")
 solana_client = Client("https://devnet.solana.com")
@@ -18,12 +22,20 @@ for tx in transactions:
 
 	des_tx: Transaction = Transaction.deserialize(raw_tx_bytes)
 	tx_instruction: TransactionInstruction = des_tx.instructions.pop()
-
-	# System Program Create accounts and transfer lamports between them == bunch of ones (signifies just a normal transaction between accounts)
+	# program id will be a bunch of ones if it's a transaction involving SOL
 	if tx_instruction.program_id.__str__() == "11111111111111111111111111111111":
-		transfer_params: TransferParams = decode_transfer(tx_instruction)
-		print(tx["slot"]) # blockheight
-        	print(f'from:{transfer_params.from_pubkey}') # from
-        	print(f'to:{transfer_params.to_pubkey}') # to
-        	print(f'amount:{transfer_params.lamports * .000000001}') # amount
-	
+		if SYSTEM_INSTRUCTIONS_LAYOUT.parse(tx_instruction.data).instruction_type == SOLInstructionType.Transfer:
+			transfer_params: SOLTransferParams = sol_decode_transfer(tx_instruction)
+			print(tx["slot"]) # blockheight
+			print(f'from:{transfer_params.from_pubkey}') # from
+			print(f'to:{transfer_params.to_pubkey}') # to
+			print(f'amount:{transfer_params.lamports * .000000001}') # amount
+	# program id will be Token... if it's a transaction involving tokens
+	if tx_instruction.program_id.__str__() == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA":
+		if INSTRUCTIONS_LAYOUT.parse(tx_instruction.data).instruction_type == SPLInstructionType.Transfer:
+			transfer_params: SPLTransferParams = spl_decode_transfer(tx_instruction)
+			print(tx["slot"]) # blockheight
+			print(f'from:{transfer_params.source}') # from
+			print(f'to:{transfer_params.dest}') # to
+			print(f'token:{None}') # TODO token
+			print(f'amount:{transfer_params.amount *.000001}') # amount
